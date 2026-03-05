@@ -1,80 +1,46 @@
-# =============================================================
-# avl.py - Albero AVL (Adelson-Velsky e Landis)
-# =============================================================
-# L'albero AVL è un Albero Binario di Ricerca BILANCIATO.
+# avl.py - Albero AVL 
+# L'albero AVL è un Albero Binario di Ricerca bilanciato
 # La differenza rispetto all'ABR normale è che l'AVL si
-# "aggiusta" automaticamente dopo ogni inserimento per
-# garantire che l'altezza resti sempre logaritmica.
+# "aggiusta" automaticamente dopo ogni inserimento per mantenersi bilanciato.
 #
-# CONCETTO CHIAVE - Fattore di Bilanciamento:
+# Fattore di Bilanciamento:
 #   fattore = altezza(sottoalbero_sinistro) - altezza(sottoalbero_destro)
 #
-#   Se il fattore è  0, +1 o -1 -> il nodo è BILANCIATO (ok)
+#   Se il fattore è  0, +1 o -1 -> il nodo è bilanciato
 #   Se il fattore è +2            -> troppo pesante a SINISTRA
 #   Se il fattore è -2            -> troppo pesante a DESTRA
 #
-# Quando un nodo è sbilanciato, si eseguono le ROTAZIONI
-# per riportare l'albero in equilibrio.
-# =============================================================
+# Quando un nodo è sbilanciato, si eseguono le rotazioni
+# per riportare l'albero in equilibrio
 
 
-# -------------------------------------------------------------
-# CLASSE: NodoAVL
-# -------------------------------------------------------------
-# Come NodoABR, ma con un attributo in più: "altezza".
-# L'altezza di un nodo è la distanza dal nodo alla foglia
-# più lontana sotto di lui.
-# Un nodo appena creato (senza figli) ha altezza 1.
-# -------------------------------------------------------------
+
+
 class NodoAVL:
 
     def __init__(self, valore):
-        # Il valore memorizzato nel nodo
         self.valore = valore
-        # Figlio sinistro: inizialmente vuoto
         self.sinistro = None
-        # Figlio destro: inizialmente vuoto
         self.destro = None
-        # Altezza del nodo: un nodo foglia parte da 1
+        # Un nodo appena creato (senza figli) ha altezza 1
         self.altezza = 1
+# L'altezza di un nodo è la distanza dal nodo alla foglia
+# più lontana sotto di lui.
 
 
-# -------------------------------------------------------------
-# CLASSE: AVL
-# -------------------------------------------------------------
-# L'albero AVL vero e proprio.
-# Contiene la radice e tutti i metodi per inserire,
-# cercare e bilanciare l'albero.
-# -------------------------------------------------------------
 class AVL:
 
     def __init__(self):
         # All'inizio l'albero è vuoto
         self.radice = None
 
-    # ---------------------------------------------------------
-    # METODO PRIVATO: _get_altezza(nodo)
-    # ---------------------------------------------------------
-    # Restituisce l'altezza di un nodo.
-    # Se il nodo è None (vuoto), l'altezza è 0.
-    # Questo metodo ci evita di controllare "if nodo is None"
-    # ogni volta che vogliamo l'altezza.
-    # ---------------------------------------------------------
+    
     def _get_altezza(self, nodo):
         if nodo is None:
             return 0
         return nodo.altezza
 
-    # ---------------------------------------------------------
-    # METODO PRIVATO: _get_bilanciamento(nodo)
-    # ---------------------------------------------------------
-    # Calcola il fattore di bilanciamento di un nodo.
-    # Formula: altezza_sinistra - altezza_destra
-    #
-    # Risultato positivo -> il sottoalbero sinistro è più alto
-    # Risultato negativo -> il sottoalbero destro è più alto
-    # Risultato zero     -> perfettamente bilanciato
-    # ---------------------------------------------------------
+    
     def _get_bilanciamento(self, nodo):
         if nodo is None:
             return 0
