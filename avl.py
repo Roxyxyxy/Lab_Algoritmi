@@ -131,7 +131,7 @@ class AVL:
     #   - Caso Destra-Destra (DD):     rotazione sinistra semplice
     #   - Caso Sinistra-Destra (SD):   prima sinistra, poi destra
     #   - Caso Destra-Sinistra (DS):   prima destra, poi sinistra
-    # ---------------------------------------------------------
+
     def _inserisci_ricorsivo(self, nodo, valore):
 
         # Se viene messo in un posto vuoto, creiamo il nodo e lo inseriamo lì
@@ -206,4 +206,3 @@ class AVL:
    
     def altezza(self):
         return self._get_altezza(self.radice)
-  # Nell'AVL questa sarà sempre O(log n), mai O(n)

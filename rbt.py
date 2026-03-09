@@ -1,6 +1,4 @@
-# =============================================================
 # rbt.py - Albero Rosso-Nero (Red-Black Tree)
-# =============================================================
 # L'Albero Rosso-Nero è un altro tipo di Albero Binario di
 # Ricerca BILANCIATO. Invece di usare le altezze come l'AVL,
 # usa una colorazione dei nodi (ROSSO o NERO) per garantire
@@ -17,29 +15,20 @@
 #
 # Quando inseriamo un nodo, potremmo violare queste regole.
 # Il metodo "_sistema_inserimento" le ripristina.
-# =============================================================
 
 # Costanti per i colori (usiamo stringhe semplici)
 ROSSO = "ROSSO"
 NERO  = "NERO"
 
 
-# -------------------------------------------------------------
-# CLASSE: NodoRBT
-# -------------------------------------------------------------
-# Come NodoAVL, ma con due differenze importanti:
-#   1. Ha l'attributo "colore" (ROSSO o NERO)
-#   2. Ha l'attributo "padre" per risalire l'albero
-#      (necessario durante il bilanciamento)
-# -------------------------------------------------------------
 class NodoRBT:
+# Ha l'attributo "colore" (ROSSO o NERO)
+# Ha l'attributo "padre" per risalire l'albero (necessario durante il bilanciamento)
 
     def __init__(self, valore):
         # Il valore memorizzato nel nodo
         self.valore = valore
-        # Figlio sinistro: inizialmente vuoto
         self.sinistro = None
-        # Figlio destro: inizialmente vuoto
         self.destro = None
         # Puntatore al nodo padre (necessario per risalire)
         self.padre = None
@@ -47,21 +36,12 @@ class NodoRBT:
         self.colore = ROSSO
 
 
-# -------------------------------------------------------------
-# CLASSE: RossoNero
-# -------------------------------------------------------------
-# L'Albero Rosso-Nero vero e proprio.
-# -------------------------------------------------------------
 class RossoNero:
 
     def __init__(self):
-        # All'inizio l'albero è vuoto
         self.radice = None
 
-    # ---------------------------------------------------------
-    # METODO PRIVATO: _ruota_sinistra(x)
-    # ---------------------------------------------------------
-    # Esegue una ROTAZIONE A SINISTRA attorno al nodo x.
+    # Rotazione a sinistra attorno al nodo x.
     # Rispetto all'AVL, qui dobbiamo anche aggiornare
     # i puntatori "padre" di tutti i nodi coinvolti.
     #
@@ -71,14 +51,14 @@ class RossoNero:
     #   A   y    -->    x   C
     #      / \         / \
     #     B   C       A   B
-    # ---------------------------------------------------------
+
     def _ruota_sinistra(self, x):
         # y è il figlio destro di x, salirà al posto di x
         y = x.destro
         # B è il figlio sinistro di y, cambierà posto
         B = y.sinistro
 
-        # --- Aggiornamento dei collegamenti ---
+        # Aggiornamento dei collegamenti
 
         # y sale: prende il padre di x come suo padre
         y.padre = x.padre
@@ -104,10 +84,7 @@ class RossoNero:
             # B deve sapere che ora il suo padre è x
             B.padre = x
 
-    # ---------------------------------------------------------
-    # METODO PRIVATO: _ruota_destra(y)
-    # ---------------------------------------------------------
-    # Esegue una ROTAZIONE A DESTRA attorno al nodo y.
+    # Rotazione a destra attorno al nodo y.
     # Simmetrica a _ruota_sinistra.
     #
     # Prima:          Dopo:
@@ -116,14 +93,14 @@ class RossoNero:
     #     x   C    -->    A   y
     #    / \                 / \
     #   A   B               B   C
-    # ---------------------------------------------------------
+    
     def _ruota_destra(self, y):
         # x è il figlio sinistro di y, salirà al posto di y
         x = y.sinistro
         # B è il figlio destro di x, cambierà posto
         B = x.destro
 
-        # --- Aggiornamento dei collegamenti ---
+        # Aggiornamento dei collegamenti
 
         # x sale: prende il padre di y come suo padre
         x.padre = y.padre
@@ -149,22 +126,17 @@ class RossoNero:
             # B deve sapere che ora il suo padre è y
             B.padre = y
 
-    # ---------------------------------------------------------
-    # METODO: inserisci(valore)
-    # ---------------------------------------------------------
-    # Inserisce un nuovo valore nell'albero.
+
     # L'inserimento avviene in due fasi:
-    #   FASE 1: Inserimento iterativo standard (come ABR),
-    #           impostando correttamente i puntatori padre.
-    #   FASE 2: Chiamata a _sistema_inserimento per
-    #           ripristinare le regole Rosso-Nere.
-    # ---------------------------------------------------------
+    #   FASE 1: Inserimento (come ABR), impostando correttamente i puntatori padre.
+    #   FASE 2: Chiamata a _sistema_inserimento per ripristinare le regole Rosso-Nere.
+
     def inserisci(self, valore):
 
         # Creiamo il nuovo nodo (parte come ROSSO per default)
         nuovo = NodoRBT(valore)
 
-        # --- FASE 1: Inserimento iterativo stile ABR ---
+        # Inserimento 
 
         # Se l'albero è vuoto, il nuovo nodo è la radice
         if self.radice is None:
@@ -194,29 +166,21 @@ class RossoNero:
         else:
             nodo_padre.destro = nuovo
 
-        # --- FASE 2: Ripristino delle regole Rosso-Nere ---
+        # Ripristino delle regole Rosso-Nere
         self._sistema_inserimento(nuovo)
 
-    # ---------------------------------------------------------
-    # METODO PRIVATO: _sistema_inserimento(nodo)
-    # ---------------------------------------------------------
-    # Questo metodo ripristina le regole dell'albero Rosso-Nero
-    # dopo un inserimento. Usa un ciclo while che sale verso
-    # la radice finché non trova e risolve le violazioni.
-    #
-    # Violazione possibile: "doppio rosso" (un nodo rosso
-    # ha un padre rosso -> vieta la Regola 3).
-    #
-    # Esistono 3 casi principali (più i loro speculari):
-    #   CASO 1: Lo ZIO del nodo è ROSSO
-    #     -> Ricolorazione: padre e zio diventano NERI,
-    #        nonno diventa ROSSO. Poi risaliamo.
+
+    # Questo metodo ripristina le regole dell'albero Rosso-Nero dopo un inserimento. 
+    # Usa un ciclo while che sale verso la radice finché non trova e risolve le violazioni.
+    # Violazione possibile: "doppio rosso" (un nodo rosso ha un padre rosso )
+    # Esistono 3 casi principali:
+    #   CASO 1: Lo ZIO del nodo è ROSSO 
+    #       -Ricolorazione: padre e zio diventano NERI, nonno diventa ROSSO. Poi risaliamo.
     #   CASO 2: Lo ZIO è NERO e il nodo forma una "CURVA"
-    #     -> Rotazione per raddrizzare la curva,
-    #        poi si ricade nel Caso 3.
+    #       -Rotazione per raddrizzare la curva, poi si ricade nel Caso 3.
     #   CASO 3: Lo ZIO è NERO e il nodo forma una "LINEA"
-    #     -> Rotazione sul nonno e scambio di colori.
-    # ---------------------------------------------------------
+    #       -Rotazione sul nonno e scambio di colori.
+
     def _sistema_inserimento(self, nodo):
 
         # Continuiamo finché il padre del nodo è ROSSO
@@ -227,75 +191,47 @@ class RossoNero:
             padre  = nodo.padre
             nonno  = padre.padre
 
-            # Se non c'è nonno, non possiamo continuare
-            # (questo non dovrebbe succedere in un albero valido)
+            # Se non c'è nonno, non possiamo continuare 
             if nonno is None:
                 break
 
-            # =====================================================
-            # SITUAZIONE A: il padre è figlio SINISTRO del nonno
-            # =====================================================
+            # Situazione in cui il padre è figlio sinistro del nonno
             if padre == nonno.sinistro:
 
-                # Lo zio è il figlio DESTRO del nonno
+                # Lo zio è il figlio destro del nonno
                 zio = nonno.destro
 
-                # -------------------------------------------------
-                # CASO 1A: Lo zio è ROSSO
-                # -------------------------------------------------
-                # Soluzione: ricolorazione
-                #   - Padre diventa NERO
-                #   - Zio diventa NERO
-                #   - Nonno diventa ROSSO (e diventa il nuovo "nodo"
-                #     da controllare nella prossima iterazione)
-                # -------------------------------------------------
+                # Caso in cui lo zio è ROSSO
+               
                 if zio is not None and zio.colore == ROSSO:
                     padre.colore  = NERO
                     zio.colore    = NERO
                     nonno.colore  = ROSSO
-                    # Risaliamo: ora il nonno potrebbe creare
-                    # un nuovo "doppio rosso" con il suo padre
+                    # Risaliamo al nonno per verificare se ci sono altre violazioni
                     nodo = nonno
 
                 else:
-                    # -------------------------------------------------
-                    # CASO 2A: Lo zio è NERO, il nodo è figlio DESTRO
-                    #          (forma una "curva": sinistra poi destra)
-                    # -------------------------------------------------
-                    # Soluzione: ruotiamo a sinistra sul padre per
-                    # raddrizzare la curva e ricadere nel Caso 3A
-                    # -------------------------------------------------
+                    # Caso in cui lo zio è NERO, il nodo è figlio DESTRO (forma una "curva": sinistra poi destra)
                     if nodo == padre.destro:
-                        # Dopo la rotazione, padre scende e nodo sale.
-                        # Scambiamo i riferimenti per continuare
-                        # correttamente nel Caso 3A
+                        # Dopo la rotazione, padre scende e nodo sale
                         nodo = padre
                         self._ruota_sinistra(nodo)
                         # Aggiorniamo padre dopo la rotazione
                         padre = nodo.padre
 
-                    # -------------------------------------------------
-                    # CASO 3A: Lo zio è NERO, il nodo è figlio SINISTRO
-                    #          (forma una "linea" dritta: sinistra-sinistra)
-                    # -------------------------------------------------
+                    # CASO in cui lo zio è NERO, il nodo è figlio SINISTRO (forma una "linea" dritta: sinistra-sinistra)
                     # Soluzione: ricolorazione e rotazione destra sul nonno
-                    # -------------------------------------------------
                     padre.colore = NERO
                     nonno.colore = ROSSO
                     self._ruota_destra(nonno)
 
-            # =====================================================
-            # SITUAZIONE B: il padre è figlio DESTRO del nonno
-            # (speculare alla Situazione A, le rotazioni si invertono)
-            # =====================================================
+            # Situazione in cui il padre è figlio DESTRO del nonno
             else:
 
                 # Lo zio è il figlio SINISTRO del nonno
                 zio = nonno.sinistro
 
-                # -------------------------------------------------
-                # CASO 1B: Lo zio è ROSSO (identico al Caso 1A)
-                # -------------------------------------------------
+                # CASO in cui lo zio è ROSSO
                 if zio is not None and zio.colore == ROSSO:
                     padre.colore  = NERO
                     zio.colore    = NERO
@@ -303,84 +239,52 @@ class RossoNero:
                     nodo = nonno
 
                 else:
-                    # -------------------------------------------------
-                    # CASO 2B: Lo zio è NERO, il nodo è figlio SINISTRO
-                    #          (forma una "curva": destra poi sinistra)
-                    # -------------------------------------------------
+                    # CASO in cui lo zio è NERO, il nodo è figlio SINISTRO (forma una "curva": destra poi sinistra)
                     # Soluzione: ruotiamo a destra sul padre
-                    # -------------------------------------------------
                     if nodo == padre.sinistro:
                         nodo = padre
                         self._ruota_destra(nodo)
                         padre = nodo.padre
 
-                    # -------------------------------------------------
-                    # CASO 3B: Lo zio è NERO, il nodo è figlio DESTRO
-                    #          (forma una "linea" dritta: destra-destra)
-                    # -------------------------------------------------
+                    # CASO 3B: Lo zio è NERO, il nodo è figlio DESTRO (forma una "linea" dritta: destra-destra)
                     # Soluzione: ricolorazione e rotazione sinistra sul nonno
-                    # -------------------------------------------------
                     padre.colore = NERO
                     nonno.colore = ROSSO
                     self._ruota_sinistra(nonno)
 
-        # Regola 2: la radice deve essere SEMPRE NERA.
-        # La forziamo nera alla fine di ogni sistemazione.
+        # Regola 2: la radice deve essere SEMPRE NERA. La forziamo nera alla fine di ogni sistemazione.
         self.radice.colore = NERO
 
-    # ---------------------------------------------------------
-    # METODO: cerca(valore)
-    # ---------------------------------------------------------
-    # Cerca un valore nell'albero.
-    # Identica all'ABR: la colorazione non influisce sulla ricerca.
-    # Restituisce True se trovato, False altrimenti.
-    # ---------------------------------------------------------
+  
     def cerca(self, valore):
         return self._cerca_ricorsivo(self.radice, valore)
 
-    # ---------------------------------------------------------
-    # METODO PRIVATO: _cerca_ricorsivo(nodo, valore)
-    # ---------------------------------------------------------
+
     def _cerca_ricorsivo(self, nodo, valore):
 
-        # Caso base: nodo vuoto -> valore non trovato
         if nodo is None:
             return False
 
-        # Abbiamo trovato il valore!
         if valore == nodo.valore:
             return True
 
-        # Il valore cercato è minore -> cerchiamo a sinistra
         if valore < nodo.valore:
             return self._cerca_ricorsivo(nodo.sinistro, valore)
 
-        # Il valore cercato è maggiore -> cerchiamo a destra
         else:
             return self._cerca_ricorsivo(nodo.destro, valore)
 
-    # ---------------------------------------------------------
-    # METODO: altezza()
-    # ---------------------------------------------------------
-    # Calcola l'altezza dell'albero (utile per i grafici).
-    # Identica all'ABR, calcolata ricorsivamente.
-    # Nell'RBT l'altezza è sempre al massimo 2*log2(n+1).
-    # ---------------------------------------------------------
+
     def altezza(self):
         return self._altezza_ricorsiva(self.radice)
 
-    # ---------------------------------------------------------
-    # METODO PRIVATO: _altezza_ricorsiva(nodo)
-    # ---------------------------------------------------------
+    
     def _altezza_ricorsiva(self, nodo):
 
-        # Nodo vuoto: altezza 0
         if nodo is None:
             return 0
 
-        # Altezza sottoalbero sinistro
         altezza_sinistra = self._altezza_ricorsiva(nodo.sinistro)
-        # Altezza sottoalbero destro
         altezza_destra   = self._altezza_ricorsiva(nodo.destro)
 
         # Altezza = 1 + il massimo tra le due
