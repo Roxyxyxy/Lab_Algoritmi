@@ -1,0 +1,200 @@
++================================================================+
+|          DIAGRAMMA UML DI CLASSI - Lab_Algoritmi             |
+|  Confronto: Albero Binario (ABR), AVL, Rosso-Nero (RBT)      |
++================================================================+
+
+
+================================================================
+  FILE: abr.py
+================================================================
+
+  +----------------------+
+  |       NodoABR        |  <-- self-riferimento (sinistro, destro)
+  +----------------------+          |
+  | + valore             |          |
+  | + sinistro : NodoABR |----------+
+  | + destro   : NodoABR |----------+
+  +----------------------+
+             /\
+             |  composizione (radice)
+  +----------------------+
+  |         ABR          |
+  +----------------------+
+  | - radice : NodoABR   |
+  +----------------------+
+  | + inserisci(v)       |
+  | + cerca(v) : bool    |
+  | + altezza() : int    |
+  +----------------------+
+
+
+================================================================
+  FILE: avl.py
+================================================================
+
+  +----------------------+
+  |       NodoAVL        |  <-- self-riferimento (sinistro, destro)
+  +----------------------+          |
+  | + valore             |          |
+  | + sinistro : NodoAVL |----------+
+  | + destro   : NodoAVL |----------+
+  | + altezza  : int     |
+  +----------------------+
+             /\
+             |  composizione (radice)
+  +---------------------------+
+  |           AVL             |
+  +---------------------------+
+  | - radice : NodoAVL        |
+  +---------------------------+
+  | + inserisci(v)            |
+  | + cerca(v) : bool         |
+  | + altezza() : int         |
+  | - _inserisci_ricorsivo()  |
+  | - _cerca_ricorsivo()      |
+  | - _get_altezza(n)         |
+  | - _get_bilanciamento(n)   |
+  | - _aggiorna_altezza(n)    |
+  | - _ruota_destra(y)        |
+  | - _ruota_sinistra(x)      |
+  +---------------------------+
+
+
+================================================================
+  FILE: rbt.py
+================================================================
+
+  +----------------------+
+  |       NodoRBT        |  <-- self-riferimento (sin, des, padre)
+  +----------------------+          |
+  | + valore             |          |
+  | + sinistro : NodoRBT |----------+
+  | + destro   : NodoRBT |----------+
+  | + padre    : NodoRBT |----------+
+  | + colore   : str     |
+  +----------------------+
+             /\
+             |  composizione (radice)
+  +-----------------------------+
+  |         RossoNero           |
+  +-----------------------------+
+  | - radice : NodoRBT          |
+  +-----------------------------+
+  | + inserisci(v)              |
+  | + cerca(v) : bool           |
+  | + altezza() : int           |
+  | - _ruota_sinistra(x)        |
+  | - _ruota_destra(y)          |
+  | - _sistema_inserimento(n)   |
+  | - _cerca_ricorsivo(n, v)    |
+  | - _altezza_ricorsiva(n)     |
+  +-----------------------------+
+
+
+================================================================
+  FILE: main.py  (modulo, non una classe)
+================================================================
+
+  +-------------------------------------+
+  |        <<modulo>>  main             |
+  +-------------------------------------+
+  | DIMENSIONI      : list[int]         |
+  | QUANTE_RICERCHE : int               |
+  +-------------------------------------+
+  | + esegui_esperimenti(tipo_dati)     |
+  | + crea_grafici(tipo_dati, ...)      |
+  | + analizza_risultati(tipo_dati, ...) |
+  +-------------------------------------+
+                   |
+                   | <<usa>>
+                   v
+        ABR    AVL    RossoNero
+
+
+================================================================
+  RELAZIONI TRA CLASSI
+================================================================
+
+  1. COMPOSIZIONE  (l'albero "possiede" la radice del nodo)
+  ----------------------------------------------------------------
+    ABR        (1) ◇─────── (0..1) NodoABR
+    AVL        (1) ◇─────── (0..1) NodoAVL
+    RossoNero  (1) ◇─────── (0..1) NodoRBT
+
+    Molteplicita':
+      - L'albero ha esattamente 1 radice (puo' essere None = albero vuoto)
+      - Un nodo puo' esistere senza appartenere ancora a un albero
+
+  2. AUTO-RIFERIMENTO  (un nodo punta ad altri nodi dello stesso tipo)
+  ----------------------------------------------------------------
+    NodoABR ──────> NodoABR   (sinistro, destro)
+    NodoAVL ──────> NodoAVL   (sinistro, destro)
+    NodoRBT ──────> NodoRBT   (sinistro, destro, padre)
+
+    NodoRBT aggiunge il puntatore "padre" per risalire l'albero
+    durante il bilanciamento post-inserimento.
+
+  3. DIPENDENZA / USO  (main crea e interroga le strutture dati)
+  ----------------------------------------------------------------
+    main ──────> ABR
+    main ──────> AVL
+    main ──────> RossoNero
+
+  4. GERARCHIA CONCETTUALE  (non ereditarieta' Python esplicita)
+  ----------------------------------------------------------------
+    ABR  <|────── AVL
+    ABR  <|────── RossoNero
+
+    Nota: nel codice le tre classi sono indipendenti (nessuna
+    eredita dall'altra), ma concettualmente AVL e RossoNero
+    ESTENDONO il comportamento di un ABR aggiungendo il
+    ribilanciamento automatico.
+
+
+================================================================
+  PANORAMICA RIEPILOGATIVA DELLE CLASSI
+================================================================
+
+  Classe      | File    | Tipo         | Attributi chiave
+  ------------|---------|--------------|---------------------------
+  NodoABR     | abr.py  | Nodo         | valore, sinistro, destro
+  ABR         | abr.py  | Albero       | radice
+  NodoAVL     | avl.py  | Nodo         | valore, sinistro, destro,
+              |         |              | altezza
+  AVL         | avl.py  | Albero bilan.| radice
+  NodoRBT     | rbt.py  | Nodo         | valore, sinistro, destro,
+              |         |              | padre, colore
+  RossoNero   | rbt.py  | Albero bilan.| radice
+
+  Confronto metodi pubblici:
+  ---------------------------------------------------------------
+  Metodo          |  ABR  |  AVL  |  RossoNero |
+  ----------------|-------|-------|------------|
+  inserisci(v)    |   v   |   v   |     v      |
+  cerca(v)        |   v   |   v   |     v      |
+  altezza()       |   v   |   v   |     v      |
+
+  I tre alberi espongono la stessa interfaccia pubblica,
+  rendendo il confronto in main.py semplice e uniforme.
+
+
+================================================================
+  LEGENDA DEI SIMBOLI
+================================================================
+
+  +----------+
+  |  Nome    |   Classe / Modulo
+  +----------+
+  | attributi|   (+) pubblico      (-) privato / interno
+  +----------+
+  | metodi() |
+  +----------+
+
+  ◇───          Composizione (l'oggetto a sinistra "ha un")
+  /\            Punta verso il tipo dell'auto-riferimento
+  <<usa>>       Dipendenza: il modulo crea istanze di quella classe
+  <|────        Generalizzazione (ereditarieta' concettuale)
+
++================================================================+
+|                         FINE DIAGRAMMA                        |
++================================================================+

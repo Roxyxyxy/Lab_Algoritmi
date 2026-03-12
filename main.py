@@ -1,6 +1,4 @@
-# =============================================================
 # main.py - Script principale per il confronto degli alberi
-# =============================================================
 # Questo script mette a confronto le prestazioni di tre
 # diversi tipi di alberi di ricerca:
 #   - ABR: Albero Binario di Ricerca (non bilanciato)
@@ -14,58 +12,34 @@
 #
 # Lo facciamo sia con dati CASUALI che con dati ORDINATI,
 # per vedere come si comportano gli alberi nei casi diversi.
-# =============================================================
 
 import time
 import random
 import sys
+import math
 import matplotlib
 
 # Aumentiamo il limite di ricorsione di Python.
-# Il valore di default è 1000, che è troppo basso per alberi
-# profondi. AVL e RBT su N=3000 hanno profondità ~14-20,
-# quindi siamo al sicuro, ma questa riga è una buona pratica
-# difensiva nel caso il professore aumenti le dimensioni di test.
+# Il valore di default è 1000, che è troppo basso per alberi profondi. 
+# AVL e RBT su N=3000 hanno profondità ~14-20
 sys.setrecursionlimit(10000)
-# Usiamo il backend 'Agg' che funziona SENZA interfaccia grafica
-# (necessario per PythonAnywhere e ambienti senza monitor)
+# Usiamo il backend 'Agg' che serve per salvare grafici su file senza mostrarli a schermo
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-
-# Importiamo le nostre tre strutture dati dai file creati
 from abr import ABR
 from avl import AVL
 from rbt import RossoNero
 
-# =============================================================
-# CONFIGURAZIONE DELL'ESPERIMENTO
-# =============================================================
+
 # Teniamo le dimensioni basse per evitare il RecursionError
 # che l'ABR su dati ordinati provoca con liste molto lunghe
 # (ogni nodo aggiunto su una lista ordinata aumenta la
 # profondità della ricorsione di 1, fino al limite di Python)
-# =============================================================
 DIMENSIONI = [500, 1000, 1500, 2000, 2500, 3000]
 
 # Quanti elementi cercare per misurare il tempo di ricerca
 QUANTE_RICERCHE = 100
 
-
-# -------------------------------------------------------------
-# FUNZIONE: esegui_esperimenti(tipo_dati)
-# -------------------------------------------------------------
-# Questa è la funzione principale del progetto.
-# Esegue tutti gli esperimenti per un tipo di dati
-# ("casuali" oppure "ordinati") e restituisce i risultati
-# come dizionari separati per ogni metrica misurata.
-#
-# Parametro:
-#   tipo_dati -> stringa "casuali" o "ordinati"
-#
-# Restituisce quattro dizionari, ognuno con le chiavi
-# "ABR", "AVL", "RBT" e come valori le liste dei risultati
-# per ogni dimensione testata.
-# -------------------------------------------------------------
 def esegui_esperimenti(tipo_dati):
 
     print("\n" + "=" * 60)
@@ -82,8 +56,6 @@ def esegui_esperimenti(tipo_dati):
     for n in DIMENSIONI:
 
         print("\n  [*] Dimensione N =", n, "- tipo:", tipo_dati)
-
-        # --- Preparazione della lista di numeri ---
 
         # Creiamo una lista di N numeri interi da 1 a N*10
         # (moltiplicare per 10 riduce le collisioni/duplicati)
@@ -103,7 +75,8 @@ def esegui_esperimenti(tipo_dati):
         # per fare le ricerche (questi sicuramente esistono)
         elementi_da_cercare = random.sample(lista, QUANTE_RICERCHE)
 
-        # --- Esperimento con ABR ---
+        # Esperimento con ABR 
+        # end evita il newline, flush=True forza la stampa immediata 
         print("      - ABR: inserimento...", end=" ", flush=True)
         albero_abr = ABR()
         inizio = time.perf_counter()
@@ -112,7 +85,7 @@ def esegui_esperimenti(tipo_dati):
         fine = time.perf_counter()
         tempo_ins_abr = fine - inizio
         tempi_inserimento["ABR"].append(tempo_ins_abr)
-        print("fatto in {:.4f}s".format(tempo_ins_abr))
+        print("fatto in {:.4f}s".format(tempo_ins_abr)) # formatta il numero float con 4 cifre decimali
 
         altezza_abr = albero_abr.altezza()
         altezze["ABR"].append(altezza_abr)
@@ -127,7 +100,7 @@ def esegui_esperimenti(tipo_dati):
         tempi_ricerca["ABR"].append(tempo_ric_abr)
         print("fatta in {:.6f}s".format(tempo_ric_abr))
 
-        # --- Esperimento con AVL ---
+        # Esperimento con AVL
         print("      - AVL: inserimento...", end=" ", flush=True)
         albero_avl = AVL()
         inizio = time.perf_counter()
@@ -151,7 +124,7 @@ def esegui_esperimenti(tipo_dati):
         tempi_ricerca["AVL"].append(tempo_ric_avl)
         print("fatta in {:.6f}s".format(tempo_ric_avl))
 
-        # --- Esperimento con RBT (Rosso-Nero) ---
+        # Esperimento con RBT (Rosso-Nero)
         print("      - RBT: inserimento...", end=" ", flush=True)
         albero_rbt = RossoNero()
         inizio = time.perf_counter()
@@ -181,40 +154,25 @@ def esegui_esperimenti(tipo_dati):
     return tempi_inserimento, altezze, tempi_ricerca
 
 
-# -------------------------------------------------------------
-# FUNZIONE: crea_grafici(tipo_dati, tempi_ins, altezze, tempi_ric)
-# -------------------------------------------------------------
-# Questa funzione crea e SALVA su file due grafici a linee:
-#   1. Grafico del tempo di inserimento
-#   2. Grafico dell'altezza degli alberi
-#
-# I grafici vengono salvati come immagini .png nella cartella
-# corrente, con nomi che includono il tipo di dati usato.
-#
-# Parametri:
-#   tipo_dati  -> "casuali" o "ordinati" (usato nel titolo e nel nome file)
-#   tempi_ins  -> dizionario con i tempi di inserimento
-#   altezze    -> dizionario con le altezze
-#   tempi_ric  -> dizionario con i tempi di ricerca
-# -------------------------------------------------------------
+# Crea e salva 3 grafici .png: tempi di inserimento, altezze, tempi di ricerca.
 def crea_grafici(tipo_dati, tempi_ins, altezze, tempi_ric):
 
     print("\n  [*] Creazione grafici per dati:", tipo_dati, "...")
 
     # Colori e stili per le tre linee del grafico
-    colore_abr = "red"
+    colore_abr = "green"
     colore_avl = "blue"
-    colore_rbt = "green"
+    colore_rbt = "red"
 
-    # =========================================================
+
     # GRAFICO 1: Tempo di Inserimento
-    # =========================================================
+
     plt.figure(figsize=(10, 6))
 
     # Disegniamo una linea per ogni albero
-    plt.plot(DIMENSIONI, tempi_ins["ABR"], color=colore_abr, marker="o", label="ABR")
-    plt.plot(DIMENSIONI, tempi_ins["AVL"], color=colore_avl, marker="s", label="AVL")
-    plt.plot(DIMENSIONI, tempi_ins["RBT"], color=colore_rbt, marker="^", label="RBT")
+    plt.plot(DIMENSIONI, tempi_ins["ABR"], color=colore_abr, label="ABR")
+    plt.plot(DIMENSIONI, tempi_ins["AVL"], color=colore_avl, label="AVL")
+    plt.plot(DIMENSIONI, tempi_ins["RBT"], color=colore_rbt, label="RBT")
 
     # Titolo e etichette degli assi
     plt.title("Tempo di Inserimento - Dati " + tipo_dati.capitalize())
@@ -232,14 +190,14 @@ def crea_grafici(tipo_dati, tempi_ins, altezze, tempi_ric):
     plt.close()
     print("      Salvato:", nome_file_inserimento)
 
-    # =========================================================
+
     # GRAFICO 2: Altezza degli Alberi
-    # =========================================================
+
     plt.figure(figsize=(10, 6))
 
-    plt.plot(DIMENSIONI, altezze["ABR"], color=colore_abr, marker="o", label="ABR")
-    plt.plot(DIMENSIONI, altezze["AVL"], color=colore_avl, marker="s", label="AVL")
-    plt.plot(DIMENSIONI, altezze["RBT"], color=colore_rbt, marker="^", label="RBT")
+    plt.plot(DIMENSIONI, altezze["ABR"], color=colore_abr, label="ABR")
+    plt.plot(DIMENSIONI, altezze["AVL"], color=colore_avl, label="AVL")
+    plt.plot(DIMENSIONI, altezze["RBT"], color=colore_rbt, label="RBT")
 
     plt.title("Altezza degli Alberi - Dati " + tipo_dati.capitalize())
     plt.xlabel("Numero di elementi (N)")
@@ -253,14 +211,14 @@ def crea_grafici(tipo_dati, tempi_ins, altezze, tempi_ric):
     plt.close()
     print("      Salvato:", nome_file_altezze)
 
-    # =========================================================
+
     # GRAFICO 3: Tempo di Ricerca
-    # =========================================================
+
     plt.figure(figsize=(10, 6))
 
-    plt.plot(DIMENSIONI, tempi_ric["ABR"], color=colore_abr, marker="o", label="ABR")
-    plt.plot(DIMENSIONI, tempi_ric["AVL"], color=colore_avl, marker="s", label="AVL")
-    plt.plot(DIMENSIONI, tempi_ric["RBT"], color=colore_rbt, marker="^", label="RBT")
+    plt.plot(DIMENSIONI, tempi_ric["ABR"], color=colore_abr, label="ABR")
+    plt.plot(DIMENSIONI, tempi_ric["AVL"], color=colore_avl, label="AVL")
+    plt.plot(DIMENSIONI, tempi_ric["RBT"], color=colore_rbt, label="RBT")
 
     plt.title("Tempo di Ricerca (100 elementi) - Dati " + tipo_dati.capitalize())
     plt.xlabel("Numero di elementi (N)")
@@ -277,14 +235,7 @@ def crea_grafici(tipo_dati, tempi_ins, altezze, tempi_ric):
     print("  [OK] Grafici salvati!")
 
 
-# -------------------------------------------------------------
-# FUNZIONE: analizza_risultati(tipo_dati, tempi_ins, altezze, tempi_ric)
-# -------------------------------------------------------------
-# Questa funzione esamina i risultati degli esperimenti e
-# stampa a terminale un'analisi dei vantaggi e svantaggi
-# di ogni albero, che è ciò che chiede il testo del laboratorio:
-# "comprendere vantaggi e svantaggi delle diverse implementazioni"
-# -------------------------------------------------------------
+# Stampa un'analisi dei risultati: confronto di altezze, tempi e vantaggi/svantaggi.
 def analizza_risultati(tipo_dati, tempi_ins, altezze, tempi_ric):
 
     print("\n" + "=" * 60)
@@ -307,8 +258,8 @@ def analizza_risultati(tipo_dati, tempi_ins, altezze, tempi_ric):
     t_ric_avl = tempi_ric["AVL"][i_max]
     t_ric_rbt = tempi_ric["RBT"][i_max]
 
-    # --- ANALISI ALTEZZA ---
-    print("\n  -- ALTEZZA con N =", n_max, "--")
+    # ANALISI ALTEZZA
+    print("\n  ALTEZZA con N =", n_max)
     print("    ABR:", h_abr)
     print("    AVL:", h_avl)
     print("    RBT:", h_rbt)
@@ -319,8 +270,8 @@ def analizza_risultati(tipo_dati, tempi_ins, altezze, tempi_ric):
         print("    Ogni elemento inserito e' maggiore del precedente, quindi")
         print("    va sempre a destra: si forma una catena lunga N nodi.")
         print("    Questo e' il CASO PEGGIORE dell'ABR: O(n) invece di O(log n).")
-        print("    AVL mantiene altezza", h_avl, "(teorico: floor(log2(" + str(n_max) + ")) + 1).")
-        print("    RBT mantiene altezza", h_rbt, "(teorico: al massimo 2*log2(" + str(n_max) + "+1)).")
+        print("    AVL mantiene altezza", h_avl, "(teorico:", int(math.log2(n_max)) + 1, ").")
+        print("    RBT mantiene altezza", h_rbt, "(teorico al massimo:", int(2 * math.log2(n_max + 1)), ").")
         print("    VANTAGGIO di AVL e RBT: altezza SEMPRE logaritmica, anche")
         print("    nel caso peggiore (dati ordinati).")
     else:
@@ -330,8 +281,8 @@ def analizza_risultati(tipo_dati, tempi_ins, altezze, tempi_ric):
         print("    AVL e RBT garantiscono il bilanciamento in OGNI caso,")
         print("    mentre l'ABR dipende dall'ordine dei dati.")
 
-    # --- ANALISI INSERIMENTO ---
-    print("\n  -- TEMPO DI INSERIMENTO con N =", n_max, "--")
+    # ANALISI INSERIMENTO
+    print("\n  TEMPO DI INSERIMENTO con N =", n_max)
     print("    ABR: {:.4f}s".format(t_ins_abr))
     print("    AVL: {:.4f}s".format(t_ins_avl))
     print("    RBT: {:.4f}s".format(t_ins_rbt))
@@ -350,8 +301,8 @@ def analizza_risultati(tipo_dati, tempi_ins, altezze, tempi_ric):
         print("    VANTAGGIO di ABR su dati casuali: overhead minimo.")
         print("    SVANTAGGIO: questo vantaggio scompare con dati ordinati.")
 
-    # --- ANALISI RICERCA ---
-    print("\n  -- TEMPO DI RICERCA (" + str(QUANTE_RICERCHE) + " elementi) con N =", n_max, "--")
+    # ANALISI RICERCA
+    print("\n  TEMPO DI RICERCA (" + str(QUANTE_RICERCHE) + " elementi) con N =", n_max)
     print("    ABR: {:.6f}s".format(t_ric_abr))
     print("    AVL: {:.6f}s".format(t_ric_avl))
     print("    RBT: {:.6f}s".format(t_ric_rbt))
@@ -370,8 +321,8 @@ def analizza_risultati(tipo_dati, tempi_ins, altezze, tempi_ric):
         print("    Con dati casuali la ricerca e' simile per tutti e tre.")
         print("    L'altezza piu' bassa di AVL e RBT puo' dare un lieve vantaggio.")
 
-    # --- CONCLUSIONE FINALE ---
-    print("\n  -- RIEPILOGO VANTAGGI / SVANTAGGI --")
+    # CONCLUSIONE FINALE
+    print("\n  RIEPILOGO VANTAGGI / SVANTAGGI")
     print("    ABR :")
     print("      + Semplice da implementare, overhead minimo")
     print("      + Veloce su dati casuali (niente rotazioni)")
@@ -387,12 +338,7 @@ def analizza_risultati(tipo_dati, tempi_ins, altezze, tempi_ric):
     print("=" * 60)
 
 
-# =============================================================
-# PUNTO DI PARTENZA DELLO SCRIPT
-# =============================================================
-# Questo blocco viene eseguito solo quando lanciamo main.py
-# direttamente (non quando viene importato da un altro file).
-# =============================================================
+# Punto di partenza: viene eseguito solo quando si lancia main.py direttamente
 if __name__ == "__main__":
 
     print("=" * 60)
@@ -401,33 +347,16 @@ if __name__ == "__main__":
     print("  Dimensioni testate:", DIMENSIONI)
     print("  Ricerche per test: ", QUANTE_RICERCHE)
 
-    # ---------------------------------------------------------
-    # ESPERIMENTO 1: Dati CASUALI
-    # ---------------------------------------------------------
-    # Con dati casuali, l'ABR si comporta abbastanza bene
-    # perché i valori sono distribuiti in modo casuale e
-    # l'albero tende a restare ragionevolmente bilanciato.
-    # ---------------------------------------------------------
+    # Esperimento 1: dati casuali
     tempi_ins_c, altezze_c, tempi_ric_c = esegui_esperimenti("casuali")
     crea_grafici("casuali", tempi_ins_c, altezze_c, tempi_ric_c)
     analizza_risultati("casuali", tempi_ins_c, altezze_c, tempi_ric_c)
 
-    # ---------------------------------------------------------
-    # ESPERIMENTO 2: Dati ORDINATI
-    # ---------------------------------------------------------
-    # Con dati ordinati (1, 2, 3, ..., N), l'ABR degenera
-    # in una lista concatenata: ogni nodo va sempre a destra
-    # del precedente. Questo porta l'altezza a N invece di
-    # log(N), rendendo inserimento e ricerca molto lenti.
-    # AVL e RBT invece si bilanciano e restano veloci.
-    # ---------------------------------------------------------
+    # Esperimento 2: dati ordinati (caso peggiore per l'ABR)
     tempi_ins_o, altezze_o, tempi_ric_o = esegui_esperimenti("ordinati")
     crea_grafici("ordinati", tempi_ins_o, altezze_o, tempi_ric_o)
     analizza_risultati("ordinati", tempi_ins_o, altezze_o, tempi_ric_o)
 
-    # ---------------------------------------------------------
-    # Fine dello script
-    # ---------------------------------------------------------
     print("\n" + "=" * 60)
     print("  TUTTI GLI ESPERIMENTI COMPLETATI!")
     print("  File .png salvati nella cartella corrente.")
